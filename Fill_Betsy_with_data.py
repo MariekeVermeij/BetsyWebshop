@@ -37,8 +37,8 @@ class Tag_id (peewee.Model):
 #class with products per seller
 
 class Seller_per_product (peewee.Model):
-    user_id = peewee.IntegerField(unique=True)
-    product = peewee.ForeignKeyField(Product, backref='seller_product')
+    user_id = peewee.IntegerField()
+    product = peewee.ForeignKeyField(Product, backref='seller_product',unique=True)
   
     class Meta:
         database = db
