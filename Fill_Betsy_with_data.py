@@ -7,36 +7,37 @@ db = peewee.SqliteDatabase("Betsy.db")
 
 
 
+
+class BaseModel(peewee.Model):
+    class Meta:
+        database = db
+
 #class for product information
-class Product(peewee.Model):
+class Product(BaseModel):
     product_name = peewee.CharField()
     product_id = peewee.IntegerField(unique=True)
     description = peewee.CharField()
-    price_per_unit = peewee.DecimalField(decimal_places = 10)
+    price_per_unit = peewee.DecimalField(decimal_places = 2,auto_round=True)
     quantity_in_stock = peewee.IntegerField()
 
-    class Meta:
-        database = db
+
 
 #class to link tags with products
-class Tags_per_Product(peewee.Model):
+class Tags_per_Product(BaseModel):
     product_id = peewee.ForeignKeyField(Product, backref='tags_product')
     tag_id =  peewee.IntegerField()
     
-    class Meta:
-        database = db
+
 #class with description of tag_ids
 
-class Tag_id (peewee.Model):
-    tag_name = peewee.CharField()
-    tag_id = peewee.ForeignKeyField(Tags_per_Product, backref='tag_name')
+class Tag_id (BaseModel):
+    tag_name = peewee.CharField(unique=True)
+    tag_id = peewee.ForeignKeyField(Tags_per_Product, backref='tag_name',unique=True)
 
-    class Meta:
-        database = db
 
-#class with products per seller
+#class with products per seller 
 
-class Seller_per_product (peewee.Model):
+class Seller_per_product (BaseModel):
     user_id = peewee.IntegerField()
     product = peewee.ForeignKeyField(Product, backref='seller_product',unique=True)
   
@@ -46,20 +47,18 @@ class Seller_per_product (peewee.Model):
 
 #class with user information
 
-class User(peewee.Model):
+class User(BaseModel):
     user_id = peewee.ForeignKeyField(Seller_per_product, backref='user') 
     user_name = peewee.CharField()
     address_line1 = peewee.CharField()
     address_line2 = peewee.CharField()
     postal_code = peewee.CharField()
     city = peewee.CharField()
- 
-    class Meta:
-        database = db
+    billing_info = peewee.CharField()
 
 #class with transaction information
 
-class Transaction_history(peewee.Model):
+class Transaction_history(BaseModel):
     transaction_id = peewee.IntegerField(unique=True)
     customer_id = peewee.ForeignKeyField(User, backref='customer_transactions')
     seller_id = peewee.ForeignKeyField(User, backref='seller_transactions')
@@ -270,18 +269,19 @@ Tags_per_Product.create(product_id = 20220000039, tag_id = 10003)
 Tags_per_Product.create(product_id = 20220000039, tag_id = 60001)
 
 
-User.create(user_id = 215132, user_name = 'Freddy Gill', address_line1 = '1st floor', address_line2 = 'Grand Avenue 432', postal_code = '12364', city = 'Drehton')
-User.create(user_id = 150540, user_name = 'Jordyn Castillo', address_line1 = '', address_line2 = 'Bay Street 345', postal_code = '78543', city = 'Gruscester')
-User.create(user_id = 541350, user_name = 'Curtis Ray', address_line1 = '', address_line2 = 'Route 2', postal_code = '1642', city = 'Vidsas')
-User.create(user_id = 156181, user_name = 'Areli Lyons', address_line1 = '', address_line2 = 'B Street 32', postal_code = '13246', city = 'Vrexfast')
-User.create(user_id = 581435, user_name = 'Marlon Riggs', address_line1 = '', address_line2 = 'Highland Avenue 34b', postal_code = '5423', city = 'Zita')
-User.create(user_id = 842136, user_name = 'Lorelei Lara', address_line1 = 'Capital House', address_line2 = 'Eagle Street 23', postal_code = '16543', city = 'Rille')
-User.create(user_id = 156134, user_name = 'Rylee Jennings', address_line1 = '', address_line2 = '14th Street 45', postal_code = '6542', city = 'Flaco')
-User.create(user_id = 221513, user_name = 'Tony Hines', address_line1 = '', address_line2 = 'Edgewood Drive 86', postal_code = '16433', city = 'Sranbu')
-User.create(user_id = 216516, user_name = 'Ulises Gonzales', address_line1 = '', address_line2 = 'Tanglewood Drive 5', postal_code = '465465', city = 'Erybury')
-User.create(user_id = 216513, user_name = 'Tyrese Nguyen', address_line1 = '98979', address_line2 = 'Hanover Court 5', postal_code = '2135', city = 'Antagas')
-User.create(user_id = 125431, user_name = 'Elliana Oneill', address_line1 = '', address_line2 = 'Orchard Avenue 3', postal_code = '13253', city = 'Vrexfast')
-User.create(user_id = 256123, user_name = 'Bruno Montes', address_line1 = '', address_line2 = 'College Street 1235', postal_code = '5427', city = 'Zita')
+User.create(user_id = 215132, user_name = 'Freddy Gill', address_line1 = '1st floor', address_line2 = 'Grand Avenue 432', postal_code = '12364', city = 'Drehton', billing_info = 'No open invoices')
+User.create(user_id = 150540, user_name = 'Jordyn Castillo', address_line1 = '', address_line2 = 'Bay Street 345', postal_code = '78543', city = 'Gruscester', billing_info = 'No open invoices')
+User.create(user_id = 541350, user_name = 'Curtis Ray', address_line1 = '', address_line2 = 'Route 2', postal_code = '1642', city = 'Vidsas', billing_info = 'No open invoices')
+User.create(user_id = 156181, user_name = 'Areli Lyons', address_line1 = '', address_line2 = 'B Street 32', postal_code = '13246', city = 'Vrexfast', billing_info = 'Open Invoices')
+User.create(user_id = 581435, user_name = 'Marlon Riggs', address_line1 = '', address_line2 = 'Highland Avenue 34b', postal_code = '5423', city = 'Zita', billing_info = 'Open Invoices')
+User.create(user_id = 842136, user_name = 'Lorelei Lara', address_line1 = 'Capital House', address_line2 = 'Eagle Street 23', postal_code = '16543', city = 'Rille', billing_info = 'Open Invoices')
+User.create(user_id = 156134, user_name = 'Rylee Jennings', address_line1 = '', address_line2 = '14th Street 45', postal_code = '6542', city = 'Flaco', billing_info = 'Open Invoices')
+User.create(user_id = 221513, user_name = 'Tony Hines', address_line1 = '', address_line2 = 'Edgewood Drive 86', postal_code = '16433', city = 'Sranbu', billing_info = 'Open Invoices')
+User.create(user_id = 216516, user_name = 'Ulises Gonzales', address_line1 = '', address_line2 = 'Tanglewood Drive 5', postal_code = '465465', city = 'Erybury', billing_info = 'No open invoices')
+User.create(user_id = 216513, user_name = 'Tyrese Nguyen', address_line1 = '98979', address_line2 = 'Hanover Court 5', postal_code = '2135', city = 'Antagas', billing_info = 'No open invoices')
+User.create(user_id = 125431, user_name = 'Elliana Oneill', address_line1 = '', address_line2 = 'Orchard Avenue 3', postal_code = '13253', city = 'Vrexfast', billing_info = 'No open invoices')
+User.create(user_id = 256123, user_name = 'Bruno Montes', address_line1 = '', address_line2 = 'College Street 1235', postal_code = '5427', city = 'Zita', billing_info = 'No open invoices')
+
 
 Seller_per_product.create(user_id = '156134', product= 20220000001)
 Seller_per_product.create(user_id = '156134', product= 20220000002)
