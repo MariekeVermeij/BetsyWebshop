@@ -4,39 +4,38 @@ from datetime import date
 db = peewee.SqliteDatabase("Betsy.db")
 
 
+class BaseModel(peewee.Model):
+    class Meta:
+        database = db
 
 #class for product information
-class Product(peewee.Model):
+class Product(BaseModel):
     product_name = peewee.CharField()
     product_id = peewee.IntegerField(unique=True)
     description = peewee.CharField()
-    price_per_unit = peewee.DecimalField(decimal_places = 10)
+    price_per_unit = peewee.DecimalField(decimal_places = 2,auto_round=True)
     quantity_in_stock = peewee.IntegerField()
 
-    class Meta:
-        database = db
+
 
 #class to link tags with products
-class Tags_per_Product(peewee.Model):
+class Tags_per_Product(BaseModel):
     product_id = peewee.ForeignKeyField(Product, backref='tags_product')
     tag_id =  peewee.IntegerField()
     
-    class Meta:
-        database = db
+
 #class with description of tag_ids
 
-class Tag_id (peewee.Model):
-    tag_name = peewee.CharField()
-    tag_id = peewee.ForeignKeyField(Tags_per_Product, backref='tag_name')
+class Tag_id (BaseModel):
+    tag_name = peewee.CharField(unique=True)
+    tag_id = peewee.ForeignKeyField(Tags_per_Product, backref='tag_name',unique=True)
 
-    class Meta:
-        database = db
 
-#class with products per seller
+#class with products per seller 
 
-class Seller_per_product (peewee.Model):
+class Seller_per_product (BaseModel):
     user_id = peewee.IntegerField()
-    product = peewee.ForeignKeyField(Product, backref='seller_product',unique = True)
+    product = peewee.ForeignKeyField(Product, backref='seller_product',unique=True)
   
     class Meta:
         database = db
@@ -44,20 +43,18 @@ class Seller_per_product (peewee.Model):
 
 #class with user information
 
-class User(peewee.Model):
+class User(BaseModel):
     user_id = peewee.ForeignKeyField(Seller_per_product, backref='user') 
     user_name = peewee.CharField()
     address_line1 = peewee.CharField()
     address_line2 = peewee.CharField()
     postal_code = peewee.CharField()
     city = peewee.CharField()
- 
-    class Meta:
-        database = db
+    billing_info = peewee.CharField()
 
 #class with transaction information
 
-class Transaction_history(peewee.Model):
+class Transaction_history(BaseModel):
     transaction_id = peewee.IntegerField(unique=True)
     customer_id = peewee.ForeignKeyField(User, backref='customer_transactions')
     seller_id = peewee.ForeignKeyField(User, backref='seller_transactions')
